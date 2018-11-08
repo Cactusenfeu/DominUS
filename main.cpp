@@ -49,6 +49,52 @@ void ligne_droite(float dominos){ // nombre de dominos a placer
       MOTOR_SetSpeed(1, vd);
       MOTOR_SetSpeed(0, vg);
       delay(20);
+      
+      void tourner2(float degre){
+        double distance = degre/360 * circonferenceCercleDeuxRoues;
+        double pulses = distance/circonferenceRoue * Encodeur_roue;
+        if (pulses<0){
+          pulses *= -1;
+        }
+        ENCODER_Reset(1);
+        ENCODER_Reset(0);
+        if (distance>0){
+        MOTOR_SetSpeed(0, -vitesseVirageT);
+        MOTOR_SetSpeed(1, vitesseVirageT);
+        asservissementT(pulses, -vitesseVirageT, vitesseVirageT);
+        }
+        if (distance<0){
+        MOTOR_SetSpeed(0, vitesseVirageT);
+        MOTOR_SetSpeed(1, -vitesseVirageT);
+        asservissementT(pulses, vitesseVirageT, -vitesseVirageT);
+        }
+        
+      void asservissementT(double pulses, float vitesseG, float vitesseD){
+        bool activationDesRoues=true;
+        delay(50);
+        while (activationDesRoues){
+          long pulsesG = ENCODER_Read(0);
+          long pulsesD = ENCODER_Read(1);
+          if (pulsesG<0){
+            pulsesG = pulsesG * -1;
+          }
+          if (pulsesD<0){
+            pulsesD = pulsesD * -1;
+          }
+          if (pulsesG >= pulses || pulsesD >= pulses){
+            activationDesRoues = false;
+          }
+          float ratio = (pulsesG/pulsesD);
+          float vitesseDcorrigee = vitesseD*ratio;
+          MOTOR_SetSpeed(1, vitesseDcorrigee);
+          MOTOR_SetSpeed(0, vitesseG);
+          if (ROBUS_IsBumper(2)){
+            activationDesRoues = false;
+          }
+        }
+  MOTOR_SetSpeed(1, 0);
+  MOTOR_SetSpeed(0, 0);
+}
     
       long pulsesG = ENCODER_Read(0);
       long pulsesD = ENCODER_Read(1);
@@ -84,6 +130,17 @@ void ligne_droite(float dominos){ // nombre de dominos a placer
   }
 }*/
 
+/*void parcours_spirale_carree(){
+    delay(1000);
+    ligne_droite(76.9375);
+    tourner(90,0);
+  
+    for (int dominos=3, dominos<=300 || dominos*distance_dominos_reelle<160 , dominos+3){
+        ligne_droite(dominos);
+        tourner(90,0);  
+        ligne_droite(dominos);
+        tourner(90,0);  
+    }*/
 
 /* ****************************************************************************
 Fonctions d'initialisation (setup)
